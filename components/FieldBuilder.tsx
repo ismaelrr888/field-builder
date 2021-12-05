@@ -1,3 +1,4 @@
+import { useForm } from "@/hooks/useForm";
 import styles from "@/styles/components/FieldBuilder.module.css";
 
 const countries: string[] = [
@@ -9,6 +10,16 @@ const countries: string[] = [
 ];
 
 export default function FieldBuilder() {
+  const { formValues, handleInputChange, handleSubmit } = useForm(
+    {
+      label: "",
+      type: "",
+    },
+    (formData) => console.log(formData)
+  );
+
+  const { label } = formValues;
+
   return (
     <div className={`card ${styles.card}`}>
       <div className={`card-header ${styles.cardHeader}`}>Field Builder</div>
@@ -26,6 +37,9 @@ export default function FieldBuilder() {
                 id="label"
                 className="form-control"
                 aria-describedby="labelInLine"
+                name="label"
+                value={label}
+                onChange={handleInputChange}
               />
             </div>
           </div>
@@ -109,6 +123,7 @@ export default function FieldBuilder() {
             <div className="col-2"></div>
             <div className="col-auto">
               <button
+                onClick={handleSubmit}
                 type="button"
                 className="btn btn-success"
                 style={{

@@ -1,5 +1,13 @@
 import styles from "@/styles/components/FieldBuilder.module.css";
 
+const countries: string[] = [
+  "Asia",
+  "Australia",
+  "Europe",
+  "Americas",
+  "Africa",
+];
+
 export default function FieldBuilder() {
   return (
     <div className={`card ${styles.card}`}>
@@ -57,6 +65,73 @@ export default function FieldBuilder() {
                 className="form-control"
                 aria-describedby="labelDefaultValue"
               />
+            </div>
+          </div>
+          <div className="row g-3 mt-2">
+            <div className="col-2">
+              <label htmlFor="defaultValue" className="col-form-label">
+                Choices
+              </label>
+            </div>
+            <div className="col-auto">
+              <textarea
+                className="form-control"
+                id="floatingTextarea"
+                rows={4}
+                style={{ minWidth: 270 }}
+              ></textarea>
+            </div>
+          </div>
+          <div className="row g-3 align-items-center mt-2">
+            <div className="col-2">
+              <label htmlFor="order" className="col-form-label">
+                Order
+              </label>
+            </div>
+            <div className="col-auto">
+              <select
+                className="form-select"
+                aria-label="size 3 select example"
+                style={{ minWidth: 270 }}
+              >
+                <option selected>Display choices in Alphabetical</option>
+                {countries
+                  .sort((a: any, b: any) => a - b)
+                  .map((country: string, key: number) => (
+                    <option key={key} value={country}>
+                      {country}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          </div>
+          <div className="row g-3 align-items-center mt-4 mb-5">
+            <div className="col-2"></div>
+            <div className="col-auto">
+              <button
+                type="button"
+                className="btn btn-success"
+                style={{
+                  backgroundColor: "#5BB85B",
+                  marginRight: 5,
+                  fontWeight: 600,
+                }}
+              >
+                Save changes
+              </button>{" "}
+              OR
+              <button
+                type="button"
+                className="btn btn-link"
+                style={{
+                  color: "red",
+                  textDecoration: "none",
+                  marginLeft: 5,
+                  fontWeight: 600,
+                }}
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </form>

@@ -1,0 +1,15 @@
+.card {
+  border-radius: 10px;
+  border-color: #d6eef8;
+}
+
+.cardHeader {
+  background-color: #d6eef8;
+  color: #206d93;
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.form {
+  padding: 10px;
+}

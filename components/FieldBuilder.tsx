@@ -1,24 +1,59 @@
 import { useForm } from "@/hooks/useForm";
 import styles from "@/styles/components/FieldBuilder.module.css";
-
-const countries: string[] = [
-  "Asia",
-  "Australia",
-  "Europe",
-  "Americas",
-  "Africa",
-];
+import React, { useCallback, useMemo, useState } from "react";
+import { createEditor, Text } from "slate";
+import { Editable, Slate, withReact } from "slate-react";
 
 export default function FieldBuilder() {
+  const editor = useMemo(() => withReact(createEditor()), []);
+  const [value, setValue] = useState([
+    {
+      type: "paragraph",
+      children: [{ text: "" }],
+    },
+  ]);
+
+  const decorate = useCallback(([node, path]) => {
+    const ranges = [];
+
+    if (Text.isText(node)) {
+      const { text } = node;
+      const initSelection = 40;
+      const endSelection = text.length;
+
+      ranges.push({
+        anchor: { path, offset: initSelection },
+        focus: { path, offset: endSelection },
+        highlight: true,
+      });
+    }
+
+    return ranges;
+  }, []);
+
   const { formValues, handleInputChange, handleSubmit } = useForm(
     {
       label: "",
-      type: "",
+      type: false,
+      defaultValue: "",
+      choices: "",
+      order: "",
     },
-    (formData) => console.log(formData)
+    (values) => {
+      let choices: string[] = [];
+      value.forEach((item) => {
+        item.children.forEach((itemCh) => {
+          choices = [...choices, itemCh.text];
+        });
+      });
+      const payload = {
+        ...values,
+        choices: choices,
+      };
+    }
   );
 
-  const { label } = formValues;
+  const { label, defaultValue, order } = formValues;
 
   return (
     <div className={`card ${styles.card}`}>
@@ -58,8 +93,9 @@ export default function FieldBuilder() {
                   className="form-check-input"
                   style={{ margin: "0 6px 0 14px" }}
                   type="checkbox"
-                  value=""
                   id="flexCheckDefault"
+                  name="type"
+                  onChange={handleInputChange}
                 />
 
                 <label style={{ color: "#585858" }}>A Value is required</label>
@@ -78,6 +114,9 @@ export default function FieldBuilder() {
                 id="defaultValue"
                 className="form-control"
                 aria-describedby="labelDefaultValue"
+                name="defaultValue"
+                value={defaultValue}
+                onChange={handleInputChange}
               />
             </div>
           </div>
@@ -87,16 +126,23 @@ export default function FieldBuilder() {
                 Choices
               </label>
             </div>
-            <div className="col-auto">
-              <textarea
-                className="form-control"
-                id="floatingTextarea"
-                rows={4}
-                style={{ minWidth: 270 }}
-              ></textarea>
+            <div className="col-3">
+              <Slate
+                editor={editor}
+                value={value}
+                onChange={(newValue) => setValue(newValue)}
+              >
+                <Editable
+                  style={{ minWidth: 270, minHeight: 120 }}
+                  className="form-control"
+                  onKeyDown={(event) => console.log(value)}
+                  renderLeaf={(props) => <Leaf {...props} />}
+                  decorate={decorate}
+                />
+              </Slate>
             </div>
           </div>
-          <div className="row g-3 align-items-center mt-2">
+          <div className="row g-3 mt-2">
             <div className="col-2">
               <label htmlFor="order" className="col-form-label">
                 Order
@@ -107,15 +153,14 @@ export default function FieldBuilder() {
                 className="form-select"
                 aria-label="size 3 select example"
                 style={{ minWidth: 270 }}
+                name="order"
+                value={order}
+                onChange={handleInputChange}
               >
-                <option selected>Display choices in Alphabetical</option>
-                {countries
-                  .sort((a: any, b: any) => a - b)
-                  .map((country: string, key: number) => (
-                    <option key={key} value={country}>
-                      {country}
-                    </option>
-                  ))}
+                <option value=""></option>
+                <option value="alphabetical">
+                  Display choices in Alphabetical
+                </option>
               </select>
             </div>
           </div>
@@ -154,3 +199,17 @@ export default function FieldBuilder() {
     </div>
   );
 }
+
+const Leaf = ({ attributes, children, leaf }) => {
+  return (
+    <span
+      {...attributes}
+      {...(leaf.highlight && { "data-cy": "search-highlighted" })}
+      style={{
+        color: `${leaf.highlight ? "red" : ""}`,
+      }}
+    >
+      {children}
+    </span>
+  );
+};

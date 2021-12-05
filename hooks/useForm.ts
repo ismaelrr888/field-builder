@@ -1,11 +1,19 @@
 import { ChangeEvent, SyntheticEvent, useState } from "react";
 
-export const useForm = (initialState = {}, onSubmit: (values: {}) => void) => {
+type FormState = Record<string, any>;
+
+export const useForm = (
+  initialState: FormState = {},
+  onSubmit: (values: {}) => void
+) => {
   const [formValues, setFormValues] = useState(initialState);
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormValues({ ...formValues, [name]: value });
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | any>) => {
+    const { name, value, type, checked } = e.target;
+    setFormValues({
+      ...formValues,
+      [name]: type === "checkbox" ? checked : value,
+    });
   };
 
   const handleSubmit = (e: SyntheticEvent) => {

@@ -2,6 +2,7 @@ import { Leaf } from "@/components/Leaf";
 import { useForm } from "@/hooks/useForm";
 import styles from "@/styles/components/FieldBuilder.module.css";
 import { isEmpty } from "@/validations/isEmpty";
+import axios from "axios";
 import React, { useCallback, useMemo, useState } from "react";
 import { createEditor, Text } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
@@ -91,7 +92,13 @@ export default function FieldBuilder() {
           ...values,
           choices: choices,
         };
-        console.log(payload);
+        axios
+          .post("http://www.mocky.io/v2/566061f21200008e3aabd919", payload)
+          .then((response) => {
+            console.log(response);
+            console.log(payload);
+          })
+          .catch((error) => console.log(error));
       }
     }
   );

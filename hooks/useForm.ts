@@ -21,5 +21,9 @@ export const useForm = (
     onSubmit?.(formValues);
   };
 
-  return { formValues, handleInputChange, handleSubmit };
+  const handleClear = () => {
+    setFormValues({ ...initialState });
+  };
+
+  return { formValues, handleInputChange, handleSubmit, handleClear };
 };

@@ -46,17 +46,8 @@ export default function FieldBuilder() {
       label: "",
       choices: "",
     };
+    setErrors(errorsObj);
     const duplicateElements: string[] = toFindDuplicates(values.choices);
-    if (!isEmpty(values.label)) {
-      errorsObj.label = "";
-    }
-    if (values.choices.length < 50) {
-      errorsObj.choices = "";
-    }
-    if (duplicateElements.length === 0) {
-      errorsObj.choices = "";
-    }
-
     if (isEmpty(values.label)) {
       errorsObj.label = "Is require";
     }
@@ -66,12 +57,19 @@ export default function FieldBuilder() {
     if (duplicateElements.length > 0) {
       errorsObj.choices = "Sorry we found duplicate elements";
     }
+    const choiceChecked: string[] = values.choices.filter(
+      (item: string) => item.length > 40
+    );
+    if (choiceChecked.length > 0) {
+      errorsObj.choices =
+        "Sorry we found choice(s) with more than 40 characters";
+    }
 
     setErrors(errorsObj);
     return errorsObj;
   };
 
-  const { formValues, handleInputChange, handleSubmit } = useForm(
+  const { formValues, handleInputChange, handleSubmit, handleClear } = useForm(
     {
       label: "",
       type: false,
@@ -231,6 +229,15 @@ export default function FieldBuilder() {
               </button>{" "}
               OR
               <button
+                onClick={() => {
+                  handleClear();
+                  setValue([
+                    {
+                      type: "paragraph",
+                      children: [{ text: "" }],
+                    },
+                  ]);
+                }}
                 type="button"
                 className="btn btn-link"
                 style={{

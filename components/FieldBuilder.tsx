@@ -1,5 +1,7 @@
+import { Leaf } from "@/components/Leaf";
 import { useForm } from "@/hooks/useForm";
 import styles from "@/styles/components/FieldBuilder.module.css";
+import { isEmpty } from "@/validations/isEmpty";
 import React, { useCallback, useMemo, useState } from "react";
 import { createEditor, Text } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
@@ -31,25 +33,68 @@ export default function FieldBuilder() {
     return ranges;
   }, []);
 
+  const [errors, setErrors] = useState({
+    label: "",
+    choices: "",
+  });
+
+  const toFindDuplicates = (arry: string[]) =>
+    arry.filter((item, index) => arry.indexOf(item) !== index);
+
+  const checkValidations = (values: any): any => {
+    let errorsObj = {
+      label: "",
+      choices: "",
+    };
+    const duplicateElements: string[] = toFindDuplicates(values.choices);
+    if (!isEmpty(values.label)) {
+      errorsObj.label = "";
+    }
+    if (values.choices.length < 50) {
+      errorsObj.choices = "";
+    }
+    if (duplicateElements.length === 0) {
+      errorsObj.choices = "";
+    }
+
+    if (isEmpty(values.label)) {
+      errorsObj.label = "Is require";
+    }
+    if (values.choices.length > 50) {
+      errorsObj.choices = "Can't be more than 50 elements";
+    }
+    if (duplicateElements.length > 0) {
+      errorsObj.choices = "Sorry we found duplicate elements";
+    }
+
+    setErrors(errorsObj);
+    return errorsObj;
+  };
+
   const { formValues, handleInputChange, handleSubmit } = useForm(
     {
       label: "",
       type: false,
       defaultValue: "",
-      choices: "",
       order: "",
     },
-    (values) => {
+    (values: any) => {
       let choices: string[] = [];
       value.forEach((item) => {
         item.children.forEach((itemCh) => {
           choices = [...choices, itemCh.text];
         });
       });
-      const payload = {
-        ...values,
-        choices: choices,
-      };
+      values.choices = choices;
+
+      const errorsObj = checkValidations(values);
+      if (!errorsObj.label && !errorsObj.choices) {
+        const payload = {
+          ...values,
+          choices: choices,
+        };
+        console.log(payload);
+      }
     }
   );
 
@@ -70,12 +115,15 @@ export default function FieldBuilder() {
               <input
                 type="text"
                 id="label"
-                className="form-control"
+                className={`form-control ${errors.label && "is-invalid"}`}
                 aria-describedby="labelInLine"
                 name="label"
                 value={label}
                 onChange={handleInputChange}
               />
+              {errors.label && (
+                <div className="invalid-feedback">{errors.label}</div>
+              )}
             </div>
           </div>
           <div className="row g-3 align-items-center mt-2">
@@ -126,20 +174,22 @@ export default function FieldBuilder() {
                 Choices
               </label>
             </div>
-            <div className="col-3">
+            <div className="col-auto">
               <Slate
                 editor={editor}
                 value={value}
                 onChange={(newValue) => setValue(newValue)}
               >
                 <Editable
-                  style={{ minWidth: 270, minHeight: 120 }}
-                  className="form-control"
-                  onKeyDown={(event) => console.log(value)}
+                  style={{ width: 270, minHeight: 120 }}
+                  className={`form-control ${errors.choices && "is-invalid"}`}
                   renderLeaf={(props) => <Leaf {...props} />}
                   decorate={decorate}
                 />
               </Slate>
+              {errors.choices && (
+                <div className="invalid-feedback">{errors.choices}</div>
+              )}
             </div>
           </div>
           <div className="row g-3 mt-2">
@@ -199,17 +249,3 @@ export default function FieldBuilder() {
     </div>
   );
 }
-
-const Leaf = ({ attributes, children, leaf }) => {
-  return (
-    <span
-      {...attributes}
-      {...(leaf.highlight && { "data-cy": "search-highlighted" })}
-      style={{
-        color: `${leaf.highlight ? "red" : ""}`,
-      }}
-    >
-      {children}
-    </span>
-  );
-};
